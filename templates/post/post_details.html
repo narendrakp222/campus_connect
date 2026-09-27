@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Post Details - Campus Connect{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+
+<div class="post-details-page">
+
+    <a href="/post/feed" class="back-link">
+        ← Back to Feed
+    </a>
+
+
+    <!-- Post -->
+    <article
+        class="post-card"
+        data-post-id="1">
+
+        <div class="post-header">
+
+            <div class="user-info">
+
+                <div class="avatar">
+                    P
+                </div>
+
+                <div>
+                    <h3>Prem Sagar</h3>
+                    <span>Today · 10:30 AM</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="post-content">
+
+            <p>
+                Welcome to Campus Connect! 🎓
+                Share your thoughts, events and updates with
+                your campus community.
+            </p>
+
+        </div>
+
+
+        <div class="post-stats">
+
+            <span class="like-count">
+                ♥ <span class="like-number">12</span> Likes
+            </span>
+
+            <span id="commentCount">
+                2 Comments
+            </span>
+
+        </div>
+
+
+        <div class="post-actions">
+
+            <button
+                type="button"
+                class="post-action like-btn">
+
+                <span class="like-symbol">♡</span>
+                <span class="like-text">Like</span>
+
+            </button>
+
+        </div>
+
+    </article>
+
+
+    <!-- Comments -->
+    <section class="comments-section">
+
+        <div class="comments-header">
+            <h2>Comments</h2>
+        </div>
+
+
+        <div id="commentsContainer">
+
+            <!-- Comment -->
+            <div class="comment">
+
+                <div class="avatar small">
+                    A
+                </div>
+
+                <div class="comment-body">
+
+                    <div class="comment-box">
+
+                        <strong>Alex Kumar</strong>
+
+                        <p>
+                            Great post! 👍
+                        </p>
+
+                    </div>
+
+                    <span class="comment-time">
+                        20 minutes ago
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Comment -->
+            <div class="comment">
+
+                <div class="avatar small">
+                    R
+                </div>
+
+                <div class="comment-body">
+
+                    <div class="comment-box">
+
+                        <strong>Rahul</strong>
+
+                        <p>
+                            Looking forward to the event!
+                        </p>
+
+                    </div>
+
+                    <span class="comment-time">
+                        10 minutes ago
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Comment Form -->
+        <form id="commentForm" class="comment-form">
+
+            <div class="avatar small">
+                P
+            </div>
+
+            <div class="comment-input-wrapper">
+
+                <textarea
+                    id="commentInput"
+                    placeholder="Write a comment..."
+                    rows="2"
+                    maxlength="500"
+                    required></textarea>
+
+                <button
+                    type="submit"
+                    class="primary-btn">
+                    Comment
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/post.js') }}"></script>
+
+{% endblock %}

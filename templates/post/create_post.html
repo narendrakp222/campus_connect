@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Create Post - Campus Connect{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+
+<div class="create-post-page">
+
+    <div class="create-post-card">
+
+        <div class="create-post-title">
+            <h1>Create a Post</h1>
+            <p>Share something with your campus community.</p>
+        </div>
+
+
+        <form id="createPostForm">
+
+            <!-- User -->
+            <div class="post-user">
+
+                <div class="avatar">
+                    P
+                </div>
+
+                <div>
+                    <strong>Prem Sagar</strong>
+                    <span>Posting to Campus Connect</span>
+                </div>
+
+            </div>
+
+
+            <!-- Post Content -->
+            <div class="form-group">
+
+                <label for="postContent">
+                    What's on your mind?
+                </label>
+
+                <textarea
+                    id="postContent"
+                    name="content"
+                    rows="8"
+                    maxlength="1000"
+                    placeholder="Write your post here..."
+                    required></textarea>
+
+                <div class="character-count">
+                    <span id="characterCount">0</span>/1000
+                </div>
+
+            </div>
+
+
+            <!-- Error -->
+            <div
+                id="postError"
+                class="form-error"
+                hidden>
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="form-actions">
+
+                <a href="/post/feed" class="secondary-btn">
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="primary-btn">
+                    Publish Post
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/post.js') }}"></script>
+
+{% endblock %}
