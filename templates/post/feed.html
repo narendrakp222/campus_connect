@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Feed - Campus Connect{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+
+<div class="feed-page">
+
+    <!-- Feed Header -->
+    <div class="feed-header">
+        <div>
+            <h1>Campus Feed</h1>
+            <p>Connect, share and stay updated with your campus.</p>
+        </div>
+
+        <a href="/post/create" class="create-post-btn">
+            + Create Post
+        </a>
+    </div>
+
+
+    <!-- Quick Create Post -->
+    <section class="quick-post-card">
+
+        <div class="quick-post-header">
+            <div class="avatar">P</div>
+
+            <div>
+                <h3>Create a post</h3>
+                <p>Share something with your campus</p>
+            </div>
+        </div>
+
+        <textarea
+            id="quickPostContent"
+            placeholder="What's on your mind?"
+            rows="3"></textarea>
+
+        <div class="quick-post-actions">
+            <a href="/post/create" class="secondary-btn">
+                Create Post
+            </a>
+
+            <button
+                type="button"
+                id="quickPostBtn"
+                class="primary-btn">
+                Post
+            </button>
+        </div>
+
+    </section>
+
+
+    <!-- Posts -->
+    <main id="feedContainer" class="posts-container">
+
+        <!-- Example Post 1 -->
+        <article class="post-card" data-post-id="1">
+
+            <div class="post-header">
+
+                <div class="user-info">
+
+                    <div class="avatar">
+                        P
+                    </div>
+
+                    <div>
+                        <h3>Prem Sagar</h3>
+                        <span>Today · 10:30 AM</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="post-content">
+
+                <p>
+                    Welcome to Campus Connect! 🎓
+                    Share your thoughts, events and updates with
+                    your campus community.
+                </p>
+
+            </div>
+
+
+            <div class="post-stats">
+
+                <span class="like-count">
+                    <span class="like-icon">♥</span>
+                    <span class="like-number">12</span> Likes
+                </span>
+
+                <span>
+                    4 Comments
+                </span>
+
+            </div>
+
+
+            <div class="post-actions">
+
+                <button
+                    class="post-action like-btn"
+                    type="button">
+
+                    <span class="like-symbol">♡</span>
+                    <span class="like-text">Like</span>
+
+                </button>
+
+
+                <button
+                    class="post-action comment-btn"
+                    type="button">
+
+                    💬
+                    <span>Comment</span>
+
+                </button>
+
+            </div>
+
+        </article>
+
+
+        <!-- Example Post 2 -->
+        <article class="post-card" data-post-id="2">
+
+            <div class="post-header">
+
+                <div class="user-info">
+
+                    <div class="avatar">
+                        A
+                    </div>
+
+                    <div>
+                        <h3>Alex Kumar</h3>
+                        <span>Yesterday · 5:45 PM</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="post-content">
+
+                <p>
+                    Don't forget about tomorrow's campus event!
+                    See you all there. 🚀
+                </p>
+
+            </div>
+
+
+            <div class="post-stats">
+
+                <span class="like-count">
+                    <span class="like-icon">♥</span>
+                    <span class="like-number">8</span> Likes
+                </span>
+
+                <span>
+                    2 Comments
+                </span>
+
+            </div>
+
+
+            <div class="post-actions">
+
+                <button
+                    class="post-action like-btn"
+                    type="button">
+
+                    <span class="like-symbol">♡</span>
+                    <span class="like-text">Like</span>
+
+                </button>
+
+
+                <button
+                    class="post-action comment-btn"
+                    type="button">
+
+                    💬
+                    <span>Comment</span>
+
+                </button>
+
+            </div>
+
+        </article>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/post.js') }}"></script>
+
+{% endblock %}
