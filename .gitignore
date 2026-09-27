@@ -2,3 +2,7 @@ __pycache__/
 instance/
 *.pyc
 .env
+server.err
+server.log
+venv/
+.venv/

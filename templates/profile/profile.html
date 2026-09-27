@@ -1,39 +1,165 @@
 {% extends "base.html" %}
 
-{% block title %}Profile | Campus Connect{% endblock %}
+{% block title %}{{ profile.full_name or profile.username }} | Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+{% endblock %}
 
 {% block content %}
+<div class="profile-page">
 
-<section class="profile-page">
+    <!-- Profile Header Card -->
+    <div class="profile-card">
+        <div class="profile-banner"></div>
+        <div class="profile-header-content">
+            <div class="profile-avatar-large" style="background-color: {{ profile.avatar_color or '#6366f1' }};">
+                {{ (profile.full_name or profile.username)[0]|upper }}
+            </div>
 
-```
-<div class="profile-card">
+            <div class="profile-identity" style="flex: 1;">
+                <h1>{{ profile.full_name or profile.username }}</h1>
+                <p class="email">@{{ profile.username }} • {{ profile.email }}</p>
 
-    <div class="profile-header">
-        <div class="profile-avatar">
-            {{ user.username[0]|upper }}
+                <div class="meta-badges">
+                    <span class="badge badge-primary">🎓 {{ profile.department }}</span>
+                    <span class="badge">📅 Class of {{ profile.grad_year }}</span>
+                    <span class="badge">🕒 Joined {{ profile.created_at }}</span>
+                </div>
+            </div>
+
+            {% if profile.is_self %}
+            <div>
+                <button type="button" id="editProfileBtn" class="btn secondary-btn">
+                    ✏️ Edit Profile
+                </button>
+            </div>
+            {% endif %}
         </div>
 
-        <h1>{{ user.username }}</h1>
-        <p>{{ user.email }}</p>
+        <!-- Stats Grid -->
+        <div class="profile-stats-grid">
+            <div class="stat-box">
+                <div class="stat-number">{{ profile.posts_count }}</div>
+                <div class="stat-label">Posts Published</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{ profile.likes_count }}</div>
+                <div class="stat-label">Likes Received</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">{{ profile.posts|length }}</div>
+                <div class="stat-label">Total Activity</div>
+            </div>
+        </div>
+
+        <!-- Bio Section -->
+        <div class="profile-bio-section">
+            <h3>About</h3>
+            <p>{{ profile.bio or "No bio added yet. Click 'Edit Profile' to share a short bio with your peers." }}</p>
+        </div>
     </div>
 
-    <div class="profile-bio">
-        <h2>Bio</h2>
-        <p>
-            {{ user.bio or "No bio added yet." }}
-        </p>
-    </div>
+    <!-- User Posts Stream -->
+    <div style="margin-top: 10px;">
+        <h2 style="font-size: 20px; margin-bottom: 16px;">Posts by {{ profile.full_name or profile.username }}</h2>
 
-    <div class="profile-actions">
-        <a href="{{ url_for('edit_profile') }}" class="edit-profile-btn">
-            Edit Profile
-        </a>
+        <div class="posts-container">
+            {% for post in profile.posts %}
+            <article class="post-card" data-post-id="{{ post.id }}">
+                <div class="post-header">
+                    <div class="user-info">
+                        <div class="avatar" style="background-color: {{ post.author.avatar_color or '#6366f1' }};">
+                            {{ post.author.initial }}
+                        </div>
+                        <div>
+                            <h3>
+                                {{ post.author.full_name }}
+                                <span class="post-tag">{{ post.category }}</span>
+                            </h3>
+                            <span class="time">@{{ post.author.username }} • {{ post.formatted_time }}</span>
+                        </div>
+                    </div>
+
+                    {% if current_user and current_user.id == post.user_id %}
+                    <button class="post-menu-btn delete-post-btn" title="Delete Post" data-post-id="{{ post.id }}">
+                        🗑️
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="post-content">
+                    <p>{{ post.content }}</p>
+                </div>
+
+                <div class="post-stats">
+                    <span class="like-count">♥ <span class="like-number">{{ post.likes_count }}</span> Likes</span>
+                    <span>💬 {{ post.comments_count }} Comments</span>
+                </div>
+
+                <div class="post-actions">
+                    <button class="post-action like-btn {% if post.is_liked %}liked{% endif %}" type="button" data-post-id="{{ post.id }}">
+                        <span class="like-symbol">{% if post.is_liked %}♥{% else %}♡{% endif %}</span>
+                        <span class="like-text">{% if post.is_liked %}Liked{% else %}Like{% endif %}</span>
+                    </button>
+                    <a href="{{ url_for('post.post_details', post_id=post.id) }}" class="post-action comment-btn">
+                        💬 <span>Comment</span>
+                    </a>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-feed">
+                This user has not created any posts yet.
+            </div>
+            {% endfor %}
+        </div>
     </div>
 
 </div>
-```
 
-</section>
+<!-- Edit Profile Modal -->
+{% if profile.is_self %}
+<div class="modal-overlay" id="editProfileModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Profile</h2>
+            <button type="button" class="toast-close" id="closeModalBtn">&times;</button>
+        </div>
 
+        <form method="POST" action="{{ url_for('profile.edit_profile') }}" class="profile-edit-form" id="editProfileForm">
+            <div class="form-group">
+                <label for="editFullName">Full Name</label>
+                <input type="text" id="editFullName" name="full_name" value="{{ profile.full_name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editDepartment">Department / Major</label>
+                <input type="text" id="editDepartment" name="department" value="{{ profile.department }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="editGradYear">Graduation Year</label>
+                <input type="text" id="editGradYear" name="grad_year" value="{{ profile.grad_year }}" placeholder="e.g. 2026">
+            </div>
+
+            <div class="form-group">
+                <label for="editBio">Bio</label>
+                <textarea id="editBio" name="bio" rows="4" style="width:100%; padding:12px; background:var(--surface-input); border:1px solid var(--border-color); border-radius:var(--radius-md); color:var(--text-main); font-family:var(--font-body);" placeholder="Write something about yourself...">{{ profile.bio }}</textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:12px;">
+                <button type="button" class="btn secondary-btn" id="cancelModalBtn">Cancel</button>
+                <button type="submit" class="btn primary-btn">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/post.js') }}"></script>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

@@ -1,208 +1,162 @@
 {% extends "base.html" %}
 
-{% block title %}Feed - Campus Connect{% endblock %}
+{% block title %}Campus Feed | Campus Connect{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+{% endblock %}
 
 {% block content %}
-
-<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
-
 <div class="feed-page">
 
     <!-- Feed Header -->
     <div class="feed-header">
         <div>
             <h1>Campus Feed</h1>
-            <p>Connect, share and stay updated with your campus.</p>
+            <p>Connect, share announcements, and engage with your campus community.</p>
         </div>
 
-        <a href="/post/create" class="create-post-btn">
-            + Create Post
+        {% if current_user %}
+            <a href="{{ url_for('post.create_page') }}" class="btn primary-btn">
+                + New Post
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="category-filter-bar">
+        <a href="{{ url_for('post.feed', category='All') }}" class="category-pill {% if active_category == 'All' or not active_category %}active{% endif %}">
+            🌟 All Posts
+        </a>
+        <a href="{{ url_for('post.feed', category='General') }}" class="category-pill {% if active_category == 'General' %}active{% endif %}">
+            💬 General
+        </a>
+        <a href="{{ url_for('post.feed', category='Announcement') }}" class="category-pill {% if active_category == 'Announcement' %}active{% endif %}">
+            📢 Announcements
+        </a>
+        <a href="{{ url_for('post.feed', category='Event') }}" class="category-pill {% if active_category == 'Event' %}active{% endif %}">
+            🎉 Events
+        </a>
+        <a href="{{ url_for('post.feed', category='Question') }}" class="category-pill {% if active_category == 'Question' %}active{% endif %}">
+            ❓ Questions
+        </a>
+        <a href="{{ url_for('post.feed', category='Project') }}" class="category-pill {% if active_category == 'Project' %}active{% endif %}">
+            🚀 Projects
         </a>
     </div>
 
-
-    <!-- Quick Create Post -->
+    <!-- Quick Post Widget -->
+    {% if current_user %}
     <section class="quick-post-card">
-
         <div class="quick-post-header">
-            <div class="avatar">P</div>
-
+            <div class="avatar" style="background-color: {{ current_user.avatar_color or '#6366f1' }};">
+                {{ (current_user.full_name or current_user.username)[0]|upper }}
+            </div>
             <div>
-                <h3>Create a post</h3>
-                <p>Share something with your campus</p>
+                <h3>Share an update</h3>
+                <p>Posting as <strong>{{ current_user.full_name or current_user.username }}</strong></p>
             </div>
         </div>
 
         <textarea
             id="quickPostContent"
-            placeholder="What's on your mind?"
+            placeholder="What's happening on campus today?"
             rows="3"></textarea>
 
         <div class="quick-post-actions">
-            <a href="/post/create" class="secondary-btn">
-                Create Post
-            </a>
+            <div class="category-select-wrapper">
+                <select id="quickPostCategory" class="category-select">
+                    <option value="General">💬 General</option>
+                    <option value="Announcement">📢 Announcement</option>
+                    <option value="Event">🎉 Event</option>
+                    <option value="Question">❓ Question</option>
+                    <option value="Project">🚀 Project</option>
+                </select>
+            </div>
 
             <button
                 type="button"
                 id="quickPostBtn"
-                class="primary-btn">
-                Post
+                class="btn primary-btn">
+                Publish Post
             </button>
         </div>
-
     </section>
+    {% else %}
+    <div class="quick-post-card" style="text-align: center; padding: 24px;">
+        <p style="color: var(--text-muted); font-size: 15px;">
+            🔑 <a href="{{ url_for('auth.login_page') }}">Log in</a> or <a href="{{ url_for('auth.register_page') }}">Sign up</a> to share posts and join campus discussions.
+        </p>
+    </div>
+    {% endif %}
 
-
-    <!-- Posts -->
+    <!-- Posts Container -->
     <main id="feedContainer" class="posts-container">
-
-        <!-- Example Post 1 -->
-        <article class="post-card" data-post-id="1">
-
+        {% for post in posts %}
+        <article class="post-card" data-post-id="{{ post.id }}">
             <div class="post-header">
-
                 <div class="user-info">
-
-                    <div class="avatar">
-                        P
+                    <div class="avatar" style="background-color: {{ post.author.avatar_color or '#6366f1' }};">
+                        {{ post.author.initial }}
                     </div>
-
                     <div>
-                        <h3>Prem Sagar</h3>
-                        <span>Today · 10:30 AM</span>
+                        <h3>
+                            <a href="{{ url_for('profile.user_profile', user_id=post.author.id) }}" style="color: inherit;">
+                                {{ post.author.full_name }}
+                            </a>
+                            <span class="post-tag">{{ post.category }}</span>
+                        </h3>
+                        <span class="time">@{{ post.author.username }} • {{ post.formatted_time }}</span>
                     </div>
-
                 </div>
 
+                {% if current_user and current_user.id == post.user_id %}
+                <button
+                    class="post-menu-btn delete-post-btn"
+                    title="Delete Post"
+                    data-post-id="{{ post.id }}">
+                    🗑️
+                </button>
+                {% endif %}
             </div>
-
 
             <div class="post-content">
-
-                <p>
-                    Welcome to Campus Connect! 🎓
-                    Share your thoughts, events and updates with
-                    your campus community.
-                </p>
-
+                <p>{{ post.content }}</p>
             </div>
-
 
             <div class="post-stats">
-
                 <span class="like-count">
-                    <span class="like-icon">♥</span>
-                    <span class="like-number">12</span> Likes
+                    ♥ <span class="like-number">{{ post.likes_count }}</span> Likes
                 </span>
-
                 <span>
-                    4 Comments
+                    💬 <span class="comment-number">{{ post.comments_count }}</span> Comments
                 </span>
-
             </div>
-
 
             <div class="post-actions">
-
                 <button
-                    class="post-action like-btn"
-                    type="button">
-
-                    <span class="like-symbol">♡</span>
-                    <span class="like-text">Like</span>
-
+                    class="post-action like-btn {% if post.is_liked %}liked{% endif %}"
+                    type="button"
+                    data-post-id="{{ post.id }}">
+                    <span class="like-symbol">{% if post.is_liked %}♥{% else %}♡{% endif %}</span>
+                    <span class="like-text">{% if post.is_liked %}Liked{% else %}Like{% endif %}</span>
                 </button>
 
-
-                <button
-                    class="post-action comment-btn"
-                    type="button">
-
-                    💬
-                    <span>Comment</span>
-
-                </button>
-
+                <a href="{{ url_for('post.post_details', post_id=post.id) }}" class="post-action comment-btn">
+                    💬 <span>Comment</span>
+                </a>
             </div>
-
         </article>
-
-
-        <!-- Example Post 2 -->
-        <article class="post-card" data-post-id="2">
-
-            <div class="post-header">
-
-                <div class="user-info">
-
-                    <div class="avatar">
-                        A
-                    </div>
-
-                    <div>
-                        <h3>Alex Kumar</h3>
-                        <span>Yesterday · 5:45 PM</span>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="post-content">
-
-                <p>
-                    Don't forget about tomorrow's campus event!
-                    See you all there. 🚀
-                </p>
-
-            </div>
-
-
-            <div class="post-stats">
-
-                <span class="like-count">
-                    <span class="like-icon">♥</span>
-                    <span class="like-number">8</span> Likes
-                </span>
-
-                <span>
-                    2 Comments
-                </span>
-
-            </div>
-
-
-            <div class="post-actions">
-
-                <button
-                    class="post-action like-btn"
-                    type="button">
-
-                    <span class="like-symbol">♡</span>
-                    <span class="like-text">Like</span>
-
-                </button>
-
-
-                <button
-                    class="post-action comment-btn"
-                    type="button">
-
-                    💬
-                    <span>Comment</span>
-
-                </button>
-
-            </div>
-
-        </article>
-
+        {% else %}
+        <div class="empty-feed">
+            🎓 No posts in this category yet. Be the first to share something with your campus!
+        </div>
+        {% endfor %}
     </main>
 
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/post.js') }}"></script>
-
 {% endblock %}

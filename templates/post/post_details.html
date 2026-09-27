@@ -1,179 +1,131 @@
 {% extends "base.html" %}
 
-{% block title %}Post Details - Campus Connect{% endblock %}
+{% block title %}Post Details | Campus Connect{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+{% endblock %}
 
 {% block content %}
-
-<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
-
 <div class="post-details-page">
 
-    <a href="/post/feed" class="back-link">
-        ← Back to Feed
-    </a>
+    <div>
+        <a href="{{ url_for('post.feed') }}" class="btn secondary-btn btn-sm">
+            ← Back to Feed
+        </a>
+    </div>
 
-
-    <!-- Post -->
-    <article
-        class="post-card"
-        data-post-id="1">
-
+    <!-- Main Post Card -->
+    <article class="post-card" data-post-id="{{ post.id }}">
         <div class="post-header">
-
             <div class="user-info">
-
-                <div class="avatar">
-                    P
+                <div class="avatar" style="background-color: {{ post.author.avatar_color or '#6366f1' }};">
+                    {{ post.author.initial }}
                 </div>
-
                 <div>
-                    <h3>Prem Sagar</h3>
-                    <span>Today · 10:30 AM</span>
+                    <h3>
+                        <a href="{{ url_for('profile.user_profile', user_id=post.author.id) }}" style="color: inherit;">
+                            {{ post.author.full_name }}
+                        </a>
+                        <span class="post-tag">{{ post.category }}</span>
+                    </h3>
+                    <span class="time">@{{ post.author.username }} • {{ post.formatted_time }}</span>
                 </div>
-
             </div>
 
+            {% if current_user and current_user.id == post.user_id %}
+            <button
+                class="post-menu-btn delete-post-btn"
+                title="Delete Post"
+                data-post-id="{{ post.id }}">
+                🗑️
+            </button>
+            {% endif %}
         </div>
-
 
         <div class="post-content">
-
-            <p>
-                Welcome to Campus Connect! 🎓
-                Share your thoughts, events and updates with
-                your campus community.
-            </p>
-
+            <p>{{ post.content }}</p>
         </div>
-
 
         <div class="post-stats">
-
             <span class="like-count">
-                ♥ <span class="like-number">12</span> Likes
+                ♥ <span class="like-number">{{ post.likes_count }}</span> Likes
             </span>
-
             <span id="commentCount">
-                2 Comments
+                💬 <span class="comment-number">{{ post.comments_count }}</span> Comments
             </span>
-
         </div>
-
 
         <div class="post-actions">
-
             <button
+                class="post-action like-btn {% if post.is_liked %}liked{% endif %}"
                 type="button"
-                class="post-action like-btn">
-
-                <span class="like-symbol">♡</span>
-                <span class="like-text">Like</span>
-
+                data-post-id="{{ post.id }}">
+                <span class="like-symbol">{% if post.is_liked %}♥{% else %}♡{% endif %}</span>
+                <span class="like-text">{% if post.is_liked %}Liked{% else %}Like{% endif %}</span>
             </button>
-
         </div>
-
     </article>
 
-
-    <!-- Comments -->
+    <!-- Comments Section -->
     <section class="comments-section">
-
-        <div class="comments-header">
-            <h2>Comments</h2>
-        </div>
-
+        <h2 style="font-size: 18px;">Comments ({{ post.comments_count }})</h2>
 
         <div id="commentsContainer">
-
-            <!-- Comment -->
-            <div class="comment">
-
-                <div class="avatar small">
-                    A
+            {% for comment in post.comments %}
+            <div class="comment" data-comment-id="{{ comment.id }}">
+                <div class="avatar small" style="background-color: {{ comment.avatar_color or '#6366f1' }};">
+                    {{ comment.initial }}
                 </div>
-
                 <div class="comment-body">
-
                     <div class="comment-box">
-
-                        <strong>Alex Kumar</strong>
-
-                        <p>
-                            Great post! 👍
-                        </p>
-
+                        <strong>{{ comment.author_name }} <span style="font-size: 11px; color: var(--text-subtle); font-weight: 400;">@{{ comment.username }}</span></strong>
+                        <p>{{ comment.content }}</p>
                     </div>
-
-                    <span class="comment-time">
-                        20 minutes ago
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- Comment -->
-            <div class="comment">
-
-                <div class="avatar small">
-                    R
-                </div>
-
-                <div class="comment-body">
-
-                    <div class="comment-box">
-
-                        <strong>Rahul</strong>
-
-                        <p>
-                            Looking forward to the event!
-                        </p>
-
+                    <div class="comment-meta">
+                        <span class="comment-time">{{ comment.formatted_time }}</span>
+                        {% if current_user and current_user.id == comment.user_id %}
+                        <button class="delete-comment-btn" data-comment-id="{{ comment.id }}">Delete</button>
+                        {% endif %}
                     </div>
-
-                    <span class="comment-time">
-                        10 minutes ago
-                    </span>
-
                 </div>
-
             </div>
-
+            {% else %}
+            <p class="empty-feed" id="noCommentsMsg" style="padding: 24px; font-size: 14px;">No comments yet. Be the first to start the discussion!</p>
+            {% endfor %}
         </div>
 
-
-        <!-- Comment Form -->
-        <form id="commentForm" class="comment-form">
-
-            <div class="avatar small">
-                P
+        <!-- Add Comment Form -->
+        {% if current_user %}
+        <form id="commentForm" method="POST" action="{{ url_for('comment.add_comment', post_id=post.id) }}" class="comment-form">
+            <div class="avatar small" style="background-color: {{ current_user.avatar_color or '#6366f1' }};">
+                {{ (current_user.full_name or current_user.username)[0]|upper }}
             </div>
-
             <div class="comment-input-wrapper">
-
                 <textarea
                     id="commentInput"
+                    name="comment"
                     placeholder="Write a comment..."
                     rows="2"
                     maxlength="500"
                     required></textarea>
-
-                <button
-                    type="submit"
-                    class="primary-btn">
-                    Comment
-                </button>
-
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" class="btn primary-btn btn-sm">
+                        Post Comment
+                    </button>
+                </div>
             </div>
-
         </form>
-
+        {% else %}
+        <div style="text-align: center; padding: 14px; background: rgba(15, 23, 42, 0.4); border-radius: var(--radius-md); font-size: 13px;">
+            <a href="{{ url_for('auth.login_page') }}">Log in</a> to leave a comment.
+        </div>
+        {% endif %}
     </section>
 
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/post.js') }}"></script>
-
 {% endblock %}

@@ -1,446 +1,364 @@
-/* =========================================
-   CAMPUS CONNECT - POST JAVASCRIPT
-========================================= */
+/* ==========================================================================
+   CAMPUS CONNECT - INTERACTIVE POST & COMMENT JAVASCRIPT
+   ========================================================================== */
 
+document.addEventListener("DOMContentLoaded", () => {
 
-/* =========================================
-   LIKE BUTTON
-========================================= */
-
-document.addEventListener("click", function (event) {
-
-    const likeButton = event.target.closest(".like-btn");
-
-    if (!likeButton) {
-        return;
-    }
-
-    const postCard = likeButton.closest(".post-card");
-
-    if (!postCard) {
-        return;
-    }
-
-    const likeSymbol = likeButton.querySelector(".like-symbol");
-    const likeText = likeButton.querySelector(".like-text");
-    const likeNumber = postCard.querySelector(".like-number");
-
-    let currentLikes = parseInt(likeNumber.textContent) || 0;
-
-    if (likeButton.classList.contains("liked")) {
-
-        likeButton.classList.remove("liked");
-
-        if (likeSymbol) {
-            likeSymbol.textContent = "♡";
+    /* Helper Toast Alert */
+    function showToast(message, type = "info") {
+        let container = document.getElementById("flashContainer");
+        if (!container) {
+            container = document.createElement("div");
+            container.id = "flashContainer";
+            container.className = "flash-container";
+            document.body.appendChild(container);
         }
 
-        if (likeText) {
-            likeText.textContent = "Like";
-        }
-
-        currentLikes--;
-
-    } else {
-
-        likeButton.classList.add("liked");
-
-        if (likeSymbol) {
-            likeSymbol.textContent = "♥";
-        }
-
-        if (likeText) {
-            likeText.textContent = "Liked";
-        }
-
-        currentLikes++;
-    }
-
-    if (likeNumber) {
-        likeNumber.textContent = currentLikes;
-    }
-
-});
-
-
-/* =========================================
-   COMMENT BUTTON
-========================================= */
-
-document.addEventListener("click", function (event) {
-
-    const commentButton = event.target.closest(".comment-btn");
-
-    if (!commentButton) {
-        return;
-    }
-
-    const postCard = commentButton.closest(".post-card");
-
-    if (!postCard) {
-        return;
-    }
-
-    const postId = postCard.dataset.postId;
-
-    /*
-     * Later, the backend team can replace this
-     * with the actual Flask route.
-     */
-
-    window.location.href = `/post/${postId}`;
-
-});
-
-
-/* =========================================
-   CREATE POST VALIDATION
-========================================= */
-
-const createPostForm = document.getElementById("createPostForm");
-
-if (createPostForm) {
-
-    createPostForm.addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-        const postContent =
-            document.getElementById("postContent");
-
-        const errorBox =
-            document.getElementById("postError");
-
-        const content = postContent.value.trim();
-
-
-        if (content.length === 0) {
-
-            errorBox.textContent =
-                "Please write something before publishing.";
-
-            errorBox.hidden = false;
-
-            postContent.focus();
-
-            return;
-        }
-
-
-        if (content.length > 1000) {
-
-            errorBox.textContent =
-                "Your post cannot contain more than 1000 characters.";
-
-            errorBox.hidden = false;
-
-            return;
-        }
-
-
-        errorBox.hidden = true;
-
-
-        /*
-         * Frontend demonstration.
-         *
-         * When the Flask backend is ready,
-         * this section can submit the data
-         * to the backend using fetch() or
-         * normal form submission.
-         */
-
-        alert("Post validated successfully!");
-
-    });
-
-}
-
-
-/* =========================================
-   CHARACTER COUNTER
-========================================= */
-
-const postContent =
-    document.getElementById("postContent");
-
-const characterCount =
-    document.getElementById("characterCount");
-
-
-if (postContent && characterCount) {
-
-    postContent.addEventListener("input", function () {
-
-        characterCount.textContent =
-            postContent.value.length;
-
-    });
-
-}
-
-
-/* =========================================
-   COMMENT FORM
-========================================= */
-
-const commentForm =
-    document.getElementById("commentForm");
-
-
-if (commentForm) {
-
-    commentForm.addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-        const commentInput =
-            document.getElementById("commentInput");
-
-        const commentsContainer =
-            document.getElementById("commentsContainer");
-
-        const comment =
-            commentInput.value.trim();
-
-
-        if (comment.length === 0) {
-
-            commentInput.focus();
-
-            return;
-        }
-
-
-        /*
-         * Create new comment element
-         */
-
-        const commentElement =
-            document.createElement("div");
-
-        commentElement.className = "comment";
-
-
-        commentElement.innerHTML = `
-            <div class="avatar small">
-                P
-            </div>
-
-            <div class="comment-body">
-
-                <div class="comment-box">
-
-                    <strong>Prem Sagar</strong>
-
-                    <p>${escapeHTML(comment)}</p>
-
-                </div>
-
-                <span class="comment-time">
-                    Just now
-                </span>
-
-            </div>
+        const toast = document.createElement("div");
+        toast.className = `toast-alert ${type}`;
+        toast.innerHTML = `
+            <span>${message}</span>
+            <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
         `;
+        container.appendChild(toast);
 
-
-        commentsContainer.appendChild(commentElement);
-
-
-        commentInput.value = "";
-
-
-        /*
-         * Update comment count
-         */
-
-        const commentCount =
-            document.getElementById("commentCount");
-
-        if (commentCount) {
-
-            const currentText =
-                commentCount.textContent;
-
-            const currentCount =
-                parseInt(currentText) || 0;
-
-            commentCount.textContent =
-                `${currentCount + 1} Comments`;
-
-        }
-
-    });
-
-}
-
-
-/* =========================================
-   QUICK CREATE POST
-========================================= */
-
-const quickPostBtn =
-    document.getElementById("quickPostBtn");
-
-
-if (quickPostBtn) {
-
-    quickPostBtn.addEventListener("click", function () {
-
-        const quickPostContent =
-            document.getElementById("quickPostContent");
-
-        const content =
-            quickPostContent.value.trim();
-
-
-        if (content.length === 0) {
-
-            alert("Please write something before posting.");
-
-            quickPostContent.focus();
-
-            return;
-        }
-
-
-        addPostToFeed(content);
-
-        quickPostContent.value = "";
-
-    });
-
-}
-
-
-/* =========================================
-   ADD POST TO FEED
-========================================= */
-
-function addPostToFeed(content) {
-
-    const feedContainer =
-        document.getElementById("feedContainer");
-
-    if (!feedContainer) {
-        return;
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(100%)";
+            toast.style.transition = "all 0.4s ease";
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
     }
 
+    /* Escape HTML string helper */
+    function escapeHTML(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+    }
 
-    const postCard =
-        document.createElement("article");
+    /* ----------------------------------------------------------------------
+     * LIKE / UNLIKE HANDLER (AJAX)
+     * ---------------------------------------------------------------------- */
+    document.addEventListener("click", async (event) => {
+        const likeBtn = event.target.closest(".like-btn");
+        if (!likeBtn) return;
 
-    postCard.className = "post-card";
+        const postId = likeBtn.dataset.postId || likeBtn.closest(".post-card")?.dataset.postId;
+        if (!postId) return;
 
-    postCard.dataset.postId =
-        Date.now();
+        try {
+            const response = await fetch(`/post/${postId}/like`, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                }
+            });
 
+            const data = await response.json();
 
-    postCard.innerHTML = `
+            if (response.ok && data.success) {
+                const postCard = likeBtn.closest(".post-card");
+                const likeSymbol = likeBtn.querySelector(".like-symbol");
+                const likeText = likeBtn.querySelector(".like-text");
+                const likeNumber = postCard ? postCard.querySelector(".like-number") : null;
 
-        <div class="post-header">
+                if (data.is_liked) {
+                    likeBtn.classList.add("liked");
+                    if (likeSymbol) likeSymbol.textContent = "♥";
+                    if (likeText) likeText.textContent = "Liked";
+                } else {
+                    likeBtn.classList.remove("liked");
+                    if (likeSymbol) likeSymbol.textContent = "♡";
+                    if (likeText) likeText.textContent = "Like";
+                }
 
-            <div class="user-info">
+                if (likeNumber && data.likes_count !== undefined) {
+                    likeNumber.textContent = data.likes_count;
+                }
+            } else {
+                showToast(data.message || "Please log in to like posts.", "warning");
+            }
+        } catch (err) {
+            console.error("Error liking post:", err);
+            showToast("Network error. Please try again.", "danger");
+        }
+    });
 
-                <div class="avatar">
-                    P
-                </div>
+    /* ----------------------------------------------------------------------
+     * DELETE POST HANDLER (AJAX)
+     * ---------------------------------------------------------------------- */
+    document.addEventListener("click", async (event) => {
+        const deleteBtn = event.target.closest(".delete-post-btn");
+        if (!deleteBtn) return;
 
-                <div>
+        const postId = deleteBtn.dataset.postId;
+        if (!postId) return;
 
-                    <h3>Prem Sagar</h3>
+        if (!confirm("Are you sure you want to delete this post?")) return;
 
-                    <span>
-                        Just now
-                    </span>
+        try {
+            const response = await fetch(`/post/${postId}`, {
+                method: "DELETE",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
 
-                </div>
+            const data = await response.json();
 
-            </div>
+            if (response.ok && data.success) {
+                const postCard = deleteBtn.closest(".post-card");
+                if (postCard) {
+                    postCard.style.opacity = "0";
+                    postCard.style.transform = "scale(0.95)";
+                    postCard.style.transition = "all 0.3s ease";
+                    setTimeout(() => postCard.remove(), 300);
+                }
+                showToast("Post deleted successfully.", "success");
+            } else {
+                showToast(data.message || "Failed to delete post.", "danger");
+            }
+        } catch (err) {
+            console.error("Error deleting post:", err);
+            showToast("Error deleting post.", "danger");
+        }
+    });
 
-        </div>
+    /* ----------------------------------------------------------------------
+     * QUICK POST CREATOR HANDLER (AJAX)
+     * ---------------------------------------------------------------------- */
+    const quickPostBtn = document.getElementById("quickPostBtn");
+    const quickPostContent = document.getElementById("quickPostContent");
+    const quickPostCategory = document.getElementById("quickPostCategory");
 
+    if (quickPostBtn && quickPostContent) {
+        quickPostBtn.addEventListener("click", async () => {
+            const content = quickPostContent.value.trim();
+            const category = quickPostCategory ? quickPostCategory.value : "General";
 
-        <div class="post-content">
+            if (!content) {
+                showToast("Please write something before publishing.", "warning");
+                quickPostContent.focus();
+                return;
+            }
 
-            <p>
-                ${escapeHTML(content)}
-            </p>
+            quickPostBtn.disabled = true;
+            quickPostBtn.textContent = "Publishing...";
 
-        </div>
+            try {
+                const response = await fetch("/create-post", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify({ content, category })
+                });
 
+                const data = await response.json();
 
-        <div class="post-stats">
+                if (response.ok && data.success && data.post) {
+                    quickPostContent.value = "";
+                    showToast("Post published to campus feed!", "success");
 
-            <span class="like-count">
+                    const feedContainer = document.getElementById("feedContainer");
+                    if (feedContainer) {
+                        const emptyMsg = feedContainer.querySelector(".empty-feed");
+                        if (emptyMsg) emptyMsg.remove();
 
-                <span class="like-icon">
-                    ♥
-                </span>
+                        const p = data.post;
+                        const postElement = document.createElement("article");
+                        postElement.className = "post-card";
+                        postElement.dataset.postId = p.id;
+                        postElement.innerHTML = `
+                            <div class="post-header">
+                                <div class="user-info">
+                                    <div class="avatar" style="background-color: ${p.author.avatar_color || '#6366f1'};">
+                                        ${p.author.initial}
+                                    </div>
+                                    <div>
+                                        <h3>
+                                            <a href="/profile/${p.author.id}" style="color: inherit;">
+                                                ${escapeHTML(p.author.full_name)}
+                                            </a>
+                                            <span class="post-tag">${escapeHTML(p.category)}</span>
+                                        </h3>
+                                        <span class="time">@${escapeHTML(p.author.username)} • ${p.formatted_time}</span>
+                                    </div>
+                                </div>
+                                <button class="post-menu-btn delete-post-btn" title="Delete Post" data-post-id="${p.id}">🗑️</button>
+                            </div>
+                            <div class="post-content">
+                                <p>${escapeHTML(p.content)}</p>
+                            </div>
+                            <div class="post-stats">
+                                <span class="like-count">♥ <span class="like-number">0</span> Likes</span>
+                                <span>💬 <span class="comment-number">0</span> Comments</span>
+                            </div>
+                            <div class="post-actions">
+                                <button class="post-action like-btn" type="button" data-post-id="${p.id}">
+                                    <span class="like-symbol">♡</span>
+                                    <span class="like-text">Like</span>
+                                </button>
+                                <a href="/post/${p.id}" class="post-action comment-btn">
+                                    💬 <span>Comment</span>
+                                </a>
+                            </div>
+                        `;
 
-                <span class="like-number">
-                    0
-                </span>
+                        feedContainer.prepend(postElement);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    showToast(data.message || "Failed to create post.", "danger");
+                }
+            } catch (err) {
+                console.error("Error publishing post:", err);
+                showToast("Network error creating post.", "danger");
+            } finally {
+                quickPostBtn.disabled = false;
+                quickPostBtn.textContent = "Publish Post";
+            }
+        });
+    }
 
-                Likes
+    /* ----------------------------------------------------------------------
+     * CHARACTER COUNTER FOR CREATE POST FORM
+     * ---------------------------------------------------------------------- */
+    const postContent = document.getElementById("postContent");
+    const characterCount = document.getElementById("characterCount");
 
-            </span>
+    if (postContent && characterCount) {
+        postContent.addEventListener("input", () => {
+            characterCount.textContent = postContent.value.length;
+        });
+    }
 
-            <span>
-                0 Comments
-            </span>
+    /* ----------------------------------------------------------------------
+     * COMMENT SUBMISSION HANDLER (AJAX)
+     * ---------------------------------------------------------------------- */
+    const commentForm = document.getElementById("commentForm");
+    if (commentForm) {
+        commentForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
 
-        </div>
+            const commentInput = document.getElementById("commentInput");
+            const commentText = commentInput ? commentInput.value.trim() : "";
+            const actionUrl = commentForm.action;
 
+            if (!commentText) {
+                if (commentInput) commentInput.focus();
+                return;
+            }
 
-        <div class="post-actions">
+            const submitBtn = commentForm.querySelector("button[type='submit']");
+            if (submitBtn) submitBtn.disabled = true;
 
-            <button
-                class="post-action like-btn"
-                type="button">
+            try {
+                const response = await fetch(actionUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: JSON.stringify({ comment: commentText })
+                });
 
-                <span class="like-symbol">
-                    ♡
-                </span>
+                const data = await response.json();
 
-                <span class="like-text">
-                    Like
-                </span>
+                if (response.ok && data.success && data.comment) {
+                    commentInput.value = "";
+                    const commentsContainer = document.getElementById("commentsContainer");
+                    const noCommentsMsg = document.getElementById("noCommentsMsg");
 
-            </button>
+                    if (noCommentsMsg) noCommentsMsg.remove();
 
+                    if (commentsContainer) {
+                        const c = data.comment;
+                        const commentElement = document.createElement("div");
+                        commentElement.className = "comment";
+                        commentElement.dataset.commentId = c.id;
+                        commentElement.innerHTML = `
+                            <div class="avatar small" style="background-color: ${c.avatar_color || '#6366f1'};">
+                                ${c.initial}
+                            </div>
+                            <div class="comment-body">
+                                <div class="comment-box">
+                                    <strong>${escapeHTML(c.author_name)} <span style="font-size: 11px; color: var(--text-subtle); font-weight: 400;">@${escapeHTML(c.username)}</span></strong>
+                                    <p>${escapeHTML(c.content)}</p>
+                                </div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">${c.formatted_time}</span>
+                                    <button class="delete-comment-btn" data-comment-id="${c.id}">Delete</button>
+                                </div>
+                            </div>
+                        `;
+                        commentsContainer.appendChild(commentElement);
+                    }
 
-            <button
-                class="post-action comment-btn"
-                type="button">
+                    // Update comment count
+                    const commentCountEl = document.getElementById("commentCount");
+                    if (commentCountEl && data.comments_count !== undefined) {
+                        commentCountEl.innerHTML = `💬 <span class="comment-number">${data.comments_count}</span> Comments`;
+                    }
+                    showToast("Comment posted!", "success");
+                } else {
+                    showToast(data.message || "Failed to add comment.", "danger");
+                }
+            } catch (err) {
+                console.error("Error posting comment:", err);
+                showToast("Network error submitting comment.", "danger");
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
 
-                💬
-                <span>
-                    Comment
-                </span>
+    /* ----------------------------------------------------------------------
+     * DELETE COMMENT HANDLER (AJAX)
+     * ---------------------------------------------------------------------- */
+    document.addEventListener("click", async (event) => {
+        const deleteBtn = event.target.closest(".delete-comment-btn");
+        if (!deleteBtn) return;
 
-            </button>
+        const commentId = deleteBtn.dataset.commentId;
+        if (!commentId) return;
 
-        </div>
-    `;
+        try {
+            const response = await fetch(`/comment/${commentId}`, {
+                method: "DELETE",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
 
+            const data = await response.json();
 
-    feedContainer.prepend(postCard);
+            if (response.ok && data.success) {
+                const commentEl = deleteBtn.closest(".comment");
+                if (commentEl) {
+                    commentEl.style.opacity = "0";
+                    commentEl.style.transform = "translateX(-10px)";
+                    commentEl.style.transition = "all 0.3s ease";
+                    setTimeout(() => commentEl.remove(), 300);
+                }
 
-}
+                const commentCountEl = document.getElementById("commentCount");
+                if (commentCountEl && data.comments_count !== undefined) {
+                    commentCountEl.innerHTML = `💬 <span class="comment-number">${data.comments_count}</span> Comments`;
+                }
 
+                showToast("Comment deleted.", "success");
+            } else {
+                showToast(data.message || "Failed to delete comment.", "danger");
+            }
+        } catch (err) {
+            console.error("Error deleting comment:", err);
+            showToast("Network error deleting comment.", "danger");
+        }
+    });
 
-/* =========================================
-   SECURITY HELPER
-========================================= */
-
-function escapeHTML(text) {
-
-    const div =
-        document.createElement("div");
-
-    div.textContent = text;
-
-    return div.innerHTML;
-}
+});

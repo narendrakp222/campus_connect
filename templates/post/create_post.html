@@ -1,89 +1,71 @@
 {% extends "base.html" %}
 
-{% block title %}Create Post - Campus Connect{% endblock %}
+{% block title %}Create Post | Campus Connect{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+{% endblock %}
 
 {% block content %}
-
-<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
-
 <div class="create-post-page">
-
-    <div class="create-post-card">
-
-        <div class="create-post-title">
-            <h1>Create a Post</h1>
-            <p>Share something with your campus community.</p>
+    <div class="quick-post-card" style="padding: 32px;">
+        <div style="margin-bottom: 20px;">
+            <h1 style="font-size: 26px; margin-bottom: 6px;">Create a Post</h1>
+            <p style="color: var(--text-muted); font-size: 14px;">Share an announcement, event, question, or project update with your campus.</p>
         </div>
 
+        <form id="createPostForm" method="POST" action="{{ url_for('post.create_new_post') }}" style="display: flex; flex-direction: column; gap: 20px;">
 
-        <form id="createPostForm">
-
-            <!-- User -->
-            <div class="post-user">
-
-                <div class="avatar">
-                    P
+            <div class="quick-post-header">
+                <div class="avatar" style="background-color: {{ current_user.avatar_color or '#6366f1' }};">
+                    {{ (current_user.full_name or current_user.username)[0]|upper }}
                 </div>
-
                 <div>
-                    <strong>Prem Sagar</strong>
-                    <span>Posting to Campus Connect</span>
+                    <h3>{{ current_user.full_name or current_user.username }}</h3>
+                    <p>{{ current_user.department }}</p>
                 </div>
-
             </div>
 
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="font-size: 13px; font-weight: 600; color: var(--text-muted);">POST CATEGORY</label>
+                <select name="category" id="postCategory" class="category-select" style="padding: 12px; font-size: 14px; width: 100%; border-radius: var(--radius-md);">
+                    <option value="General">💬 General Discussion</option>
+                    <option value="Announcement">📢 Announcement</option>
+                    <option value="Event">🎉 Campus Event</option>
+                    <option value="Question">❓ Question & Help</option>
+                    <option value="Project">🚀 Project Collaboration</option>
+                </select>
+            </div>
 
-            <!-- Post Content -->
-            <div class="form-group">
-
-                <label for="postContent">
-                    What's on your mind?
-                </label>
-
+            <div class="form-group" style="display: flex; flex-direction: column; gap: 8px;">
+                <label for="postContent" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">POST CONTENT</label>
                 <textarea
                     id="postContent"
                     name="content"
-                    rows="8"
+                    rows="6"
                     maxlength="1000"
                     placeholder="Write your post here..."
                     required></textarea>
-
-                <div class="character-count">
-                    <span id="characterCount">0</span>/1000
+                <div style="text-align: right; font-size: 12px; color: var(--text-subtle);">
+                    <span id="characterCount">0</span>/1000 characters
                 </div>
-
             </div>
 
+            <div id="postError" class="validation-error" style="display: none;"></div>
 
-            <!-- Error -->
-            <div
-                id="postError"
-                class="form-error"
-                hidden>
-            </div>
-
-
-            <!-- Buttons -->
-            <div class="form-actions">
-
-                <a href="/post/feed" class="secondary-btn">
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                <a href="{{ url_for('post.feed') }}" class="btn secondary-btn">
                     Cancel
                 </a>
-
-                <button
-                    type="submit"
-                    class="primary-btn">
+                <button type="submit" class="btn primary-btn">
                     Publish Post
                 </button>
-
             </div>
-
         </form>
-
     </div>
-
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script src="{{ url_for('static', filename='js/post.js') }}"></script>
-
 {% endblock %}

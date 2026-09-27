@@ -1,56 +1,115 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Campus Connect | Social Hub{% endblock %}</title>
 
-
-<title>{% block title %}Campus Connect{% endblock %}</title>
-
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-
+    <!-- Google Fonts & Icon Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Base App CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
 </head>
-
 <body>
 
-
-<!-- Navbar Placeholder -->
-<header class="navbar">
-    <nav class="navbar-container">
-        <div class="navbar-brand">
-            Campus Connect
-        </div>
-
-        <div class="navbar-menu">
-            {% block navbar %}
-            {% endblock %}
-        </div>
-    </nav>
-</header>
-
-
-<!-- Main Content -->
-<main class="main-content">
-    {% block content %}
-    {% endblock %}
-</main>
-
-
-<!-- Footer -->
-<footer class="footer">
-    {% block footer %}
-    <div class="footer-container">
-        <p>&copy; 2026 Campus Connect. All rights reserved.</p>
+    <!-- Toast Notification Container for Flash Messages -->
+    <div class="flash-container" id="flashContainer">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast-alert {{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </div>
-    {% endblock %}
-</footer>
 
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <!-- Brand Logo -->
+            <a href="{{ url_for('post.feed') }}" class="navbar-brand">
+                <div class="brand-icon">🎓</div>
+                <span>Campus Connect</span>
+            </a>
 
-<!-- JavaScript -->
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+            <!-- Navigation Items -->
+            <nav>
+                <ul class="navbar-nav">
+                    <li>
+                        <a href="{{ url_for('post.feed') }}" class="nav-link {% if request.endpoint == 'post.feed' %}active{% endif %}">
+                            🏠 <span>Feed</span>
+                        </a>
+                    </li>
 
+                    {% if current_user %}
+                        <li>
+                            <a href="{{ url_for('post.create_page') }}" class="nav-link {% if request.endpoint == 'post.create_page' %}active{% endif %}">
+                                ✏️ <span>Create</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('profile.my_profile') }}" class="nav-user-profile">
+                                <div class="nav-avatar" style="background-color: {{ current_user.avatar_color or '#6366f1' }};">
+                                    {{ (current_user.full_name or current_user.username)[0]|upper }}
+                                </div>
+                                <span class="nav-username">{{ current_user.full_name or current_user.username }}</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary btn-sm">
+                                Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="{{ url_for('auth.login_page') }}" class="nav-link {% if request.endpoint == 'auth.login_page' %}active{% endif %}">
+                                Login
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('auth.register_page') }}" class="btn primary-btn btn-sm">
+                                Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
 
+    <!-- Main View Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 Campus Connect. Empowering campus communities.</p>
+        </div>
+    </footer>
+
+    <!-- Global Scripts -->
+    <script>
+        // Auto dismiss flash toasts after 5 seconds
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                const toasts = document.querySelectorAll(".toast-alert");
+                toasts.forEach(t => {
+                    t.style.opacity = "0";
+                    t.style.transform = "translateX(100%)";
+                    t.style.transition = "all 0.4s ease";
+                    setTimeout(() => t.remove(), 400);
+                });
+            }, 5000);
+        });
+    </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

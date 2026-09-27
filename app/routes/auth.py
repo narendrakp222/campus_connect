@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from app.services.auth_service import (
     register_user,
     login_user,
@@ -15,10 +15,15 @@ def login_page():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    result = login_user(request.form)
+    data = request.get_json() if request.is_json else request.form
+    result = login_user(data)
+
+    if request.is_json:
+        status_code = 200 if result.get("success") else 400
+        return jsonify(result), status_code
 
     if result.get("success"):
-        flash(result.get("message", "Login successful"), "success")
+        flash(result.get("message", "Welcome back!"), "success")
         return redirect(url_for("post.feed"))
 
     flash(result.get("message", "Login failed"), "danger")
@@ -32,19 +37,27 @@ def register_page():
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    result = register_user(request.form)
+    data = request.get_json() if request.is_json else request.form
+    result = register_user(data)
+
+    if request.is_json:
+        status_code = 200 if result.get("success") else 400
+        return jsonify(result), status_code
 
     if result.get("success"):
-        flash(result.get("message", "Registration successful"), "success")
-        return redirect(url_for("auth.login_page"))
+        flash(result.get("message", "Registration successful!"), "success")
+        return redirect(url_for("post.feed"))
 
     flash(result.get("message", "Registration failed"), "danger")
     return redirect(url_for("auth.register_page"))
 
 
-@auth_bp.route("/logout", methods=["GET"])
+@auth_bp.route("/logout", methods=["GET", "POST"])
 def logout():
-    logout_user()
+    result = logout_user()
 
-    flash("Logged out successfully", "success")
+    if request.is_json:
+        return jsonify(result), 200
+
+    flash("Logged out successfully.", "info")
     return redirect(url_for("auth.login_page"))
