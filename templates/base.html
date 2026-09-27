@@ -1,9 +1,56 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
 <head>
-    <title>Campus Connect</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>{% block title %}Campus Connect{% endblock %}</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+
 </head>
+
 <body>
-    {% block content %}{% endblock %}
+
+
+<!-- Navbar Placeholder -->
+<header class="navbar">
+    <nav class="navbar-container">
+        <div class="navbar-brand">
+            Campus Connect
+        </div>
+
+        <div class="navbar-menu">
+            {% block navbar %}
+            {% endblock %}
+        </div>
+    </nav>
+</header>
+
+
+<!-- Main Content -->
+<main class="main-content">
+    {% block content %}
+    {% endblock %}
+</main>
+
+
+<!-- Footer -->
+<footer class="footer">
+    {% block footer %}
+    <div class="footer-container">
+        <p>&copy; 2026 Campus Connect. All rights reserved.</p>
+    </div>
+    {% endblock %}
+</footer>
+
+
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+
 </body>
 </html>
